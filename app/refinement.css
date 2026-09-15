@@ -1,0 +1,187 @@
+/* Final visual refinement: lighter typography + soft blue navigation */
+
+body {
+  font-weight: 400;
+  color: #17243a;
+}
+
+/* Sidebar: remove any remaining green overrides */
+.modern-sidebar {
+  background: linear-gradient(180deg, #20365d 0%, #172844 100%) !important;
+  color: #fff;
+}
+.modern-brand-copy strong,
+.sidebar-profile-copy strong {
+  font-weight: 600;
+}
+.modern-brand-copy small,
+.sidebar-profile-copy small {
+  color: #aebed7 !important;
+  font-weight: 400;
+}
+.sidebar-section-title {
+  color: #8ea4c8 !important;
+  font-weight: 600 !important;
+  letter-spacing: .10em;
+}
+.sidebar-search {
+  color: #dce7f7 !important;
+  background: rgba(255,255,255,.055) !important;
+  border-color: rgba(255,255,255,.09) !important;
+}
+.sidebar-search:hover { background: rgba(255,255,255,.085) !important; }
+.modern-nav button {
+  color: #d2dced !important;
+  font-weight: 450 !important;
+}
+.modern-nav button:hover {
+  background: rgba(255,255,255,.07) !important;
+  color: #fff !important;
+}
+.modern-nav button.active {
+  background: linear-gradient(90deg, rgba(91,141,239,.26), rgba(91,141,239,.11)) !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1px rgba(132,172,247,.12) !important;
+}
+.modern-nav button.active::before {
+  background: #8ab3ff !important;
+  box-shadow: 0 0 14px rgba(138,179,255,.45) !important;
+}
+.sidebar-avatar,
+.brand-mark {
+  background: linear-gradient(145deg,#7ca8f8,#5786df) !important;
+}
+
+/* Typography system */
+h1,h2,h3,h4,h5,h6 {
+  color: #12233e;
+  font-weight: 600;
+  letter-spacing: -.025em;
+}
+.page-title-row h1,
+.page-head h1,
+.patient-title-line h1 {
+  font-weight: 590 !important;
+  letter-spacing: -.035em !important;
+}
+.eyebrow {
+  font-weight: 650 !important;
+  letter-spacing: .12em;
+}
+
+.btn,
+.row-action,
+.back-link,
+.patient-subnav button,
+.pill-tabs button,
+.settings-card,
+.modern-nav button,
+.sidebar-search,
+.topbar-action {
+  font-weight: 520 !important;
+}
+
+.field label {
+  font-weight: 520 !important;
+  color: #64748b !important;
+}
+.field input,
+.field select,
+.field textarea {
+  font-weight: 400;
+  color: #1d2b42;
+}
+
+.badge,
+.status-dot-chip,
+.count-chip {
+  font-weight: 560 !important;
+}
+
+.modern-table th {
+  font-weight: 560 !important;
+  letter-spacing: .035em !important;
+}
+.modern-table td,
+.ledger-row,
+.summary-list,
+.patient-meta-row,
+.timeline-meta,
+.muted-line {
+  font-weight: 400;
+}
+
+.patient-name-cell strong,
+.appointment-list-row strong,
+.ledger-main strong,
+.clinical-feed strong,
+.plan-card-head h3,
+.settings-card h3,
+.card-head h3,
+.section-heading h2 {
+  font-weight: 560 !important;
+}
+
+.insight-card strong,
+.metric .value,
+.finance-total,
+.plan-card-head > div:last-child > strong,
+.budget-head h2,
+.closing-summary strong {
+  font-weight: 590 !important;
+}
+
+/* Softer cards and whitespace */
+.card,
+.surface-card,
+.patient-hero,
+.patient-subnav,
+.settings-card,
+.insight-card {
+  border-color: #e6edf6 !important;
+}
+.surface-card,
+.patient-hero {
+  box-shadow: 0 10px 30px rgba(58,83,120,.055) !important;
+}
+
+.modern-topbar {
+  background: rgba(249,251,255,.9) !important;
+  border-bottom-color: #e5edf7 !important;
+}
+
+/* Blue-only neutralized accents for the main product UI */
+.tone-emerald .insight-icon,
+.badge.green,
+.status-dot-chip.active,
+.ledger-leading.income,
+.tooth-modern.done {
+  background: #eef5ff !important;
+  color: #4f7fd6 !important;
+  border-color: #d8e6fb !important;
+}
+.status-dot-chip.active span,
+.legend-dot.done,
+.history-status.realizado {
+  background: #6d9cf5 !important;
+}
+
+/* Keep danger/warning semantic colors, but soften them */
+.badge.red { background:#fff0f2 !important; color:#b8505a !important; }
+.badge.orange { background:#fff6e8 !important; color:#9a6a24 !important; }
+
+/* Better hover feel */
+.btn,
+.modern-nav button,
+.patient-subnav button,
+.settings-card,
+.tooth-modern,
+.appointment-pill,
+.row-action,
+.search-result {
+  transition: background-color .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease !important;
+}
+
+@media (max-width: 820px) {
+  .modern-sidebar { background: linear-gradient(180deg,#20365d,#172844) !important; }
+}
