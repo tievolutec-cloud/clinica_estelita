@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { CalendarDays, LayoutDashboard, LogOut, Plus, Search, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import ConnectedPatientDetail from "@/components/connected-patient-detail";
 
 type Patient = {
   id: string;
@@ -59,6 +60,7 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
   const [search, setSearch] = useState("");
   const [showPatient, setShowPatient] = useState(false);
   const [showAppointment, setShowAppointment] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [message, setMessage] = useState("");
 
   const filteredPatients = useMemo(() => {
@@ -66,6 +68,11 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
     if (!q) return patients;
     return patients.filter((patient) => `${patient.full_name} ${patient.phone || ""}`.toLowerCase().includes(q));
   }, [patients, search]);
+
+  function navigate(next: Module) {
+    setModule(next);
+    if (next !== "pacientes") setSelectedPatient(null);
+  }
 
   async function signOut() {
     const supabase = createClient();
@@ -97,6 +104,7 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
 
     setPatients((current) => [data, ...current]);
     setShowPatient(false);
+    setSelectedPatient(data as Patient);
   }
 
   async function addAppointment(event: FormEvent<HTMLFormElement>) {
@@ -135,9 +143,9 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
       <aside className="sidebar">
         <div className="brand"><div className="brand-mark">CE</div><div><strong>{clinicName}</strong><small>Sistema conectado</small></div></div>
         <nav className="nav">
-          <button className={module === "inicio" ? "active" : ""} onClick={() => setModule("inicio")}><LayoutDashboard size={18}/> Início</button>
-          <button className={module === "agenda" ? "active" : ""} onClick={() => setModule("agenda")}><CalendarDays size={18}/> Agenda</button>
-          <button className={module === "pacientes" ? "active" : ""} onClick={() => setModule("pacientes")}><Users size={18}/> Pacientes</button>
+          <button className={module === "inicio" ? "active" : ""} onClick={() => navigate("inicio")}><LayoutDashboard size={18}/> Início</button>
+          <button className={module === "agenda" ? "active" : ""} onClick={() => navigate("agenda")}><CalendarDays size={18}/> Agenda</button>
+          <button className={module === "pacientes" ? "active" : ""} onClick={() => navigate("pacientes")}><Users size={18}/> Pacientes</button>
         </nav>
         <div className="sidebar-footer">Perfil: <strong>{role}</strong><br/>Dados protegidos por RLS.</div>
       </aside>
@@ -162,10 +170,12 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
             <div className="card" style={{marginTop:16}}><div className="card-head"><h3>Próximos atendimentos</h3></div><div className="timeline">{appointments.slice(0,8).map(a => <div className="timeline-item" key={a.id}><div className="timeline-time">{fmtTime(a.starts_at)}</div><div><div className="timeline-title">{appointmentPatientName(a.patients)}</div><div className="timeline-meta">{a.procedure_name || "Atendimento"} · {labelStatus(a.status)}</div></div></div>)}{appointments.length === 0 && <div className="empty">Nenhum agendamento encontrado.</div>}</div></div>
           </>}
 
-          {module === "pacientes" && <>
+          {module === "pacientes" && selectedPatient && <ConnectedPatientDetail clinicId={clinicId} role={role} patient={selectedPatient} onBack={() => setSelectedPatient(null)} />}
+
+          {module === "pacientes" && !selectedPatient && <>
             <div className="page-head"><div><h1>Pacientes</h1><p>Cadastro persistente no PostgreSQL.</p></div><button className="btn primary" onClick={() => setShowPatient(true)}><Plus size={16}/> Novo paciente</button></div>
             <div className="toolbar"><div className="search"><Search size={17}/><input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Buscar nome ou telefone"/></div></div>
-            <div className="card table-wrap"><table><thead><tr><th>Paciente</th><th>Telefone</th><th>Nascimento</th><th>Status</th></tr></thead><tbody>{filteredPatients.map(p => <tr key={p.id}><td><strong>{p.full_name}</strong></td><td>{p.phone || "—"}</td><td>{fmtDate(p.birth_date)}</td><td><span className={p.active ? "badge green" : "badge red"}>{p.active ? "Ativo" : "Inativo"}</span></td></tr>)}</tbody></table>{filteredPatients.length === 0 && <div className="empty">Nenhum paciente encontrado.</div>}</div>
+            <div className="card table-wrap"><table><thead><tr><th>Paciente</th><th>Telefone</th><th>Nascimento</th><th>Status</th><th></th></tr></thead><tbody>{filteredPatients.map(p => <tr key={p.id}><td><strong>{p.full_name}</strong></td><td>{p.phone || "—"}</td><td>{fmtDate(p.birth_date)}</td><td><span className={p.active ? "badge green" : "badge red"}>{p.active ? "Ativo" : "Inativo"}</span></td><td><button className="btn" onClick={() => setSelectedPatient(p)}>Abrir ficha</button></td></tr>)}</tbody></table>{filteredPatients.length === 0 && <div className="empty">Nenhum paciente encontrado.</div>}</div>
           </>}
 
           {module === "agenda" && <>
