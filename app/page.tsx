@@ -40,17 +40,17 @@ export default async function Home() {
   const [{ data: patients }, { data: appointments }] = await Promise.all([
     supabase
       .from("patients")
-      .select("id,full_name,phone,birth_date,active,created_at")
+      .select("id,full_name,cpf,phone,whatsapp,email,birth_date,active,created_at")
       .eq("clinic_id", clinicId)
       .order("full_name", { ascending: true })
       .limit(500),
     supabase
       .from("appointments")
-      .select("id,starts_at,procedure_name,status,patients(full_name)")
+      .select("id,starts_at,ends_at,procedure_name,status,patient_id,patients(full_name)")
       .eq("clinic_id", clinicId)
-      .gte("starts_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .gte("starts_at", new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString())
       .order("starts_at", { ascending: true })
-      .limit(200),
+      .limit(1000),
   ]);
 
   const userName = String(user.user_metadata?.full_name || user.email || "Usuário");
