@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useRef, useState } from "react";
 import {
-  Bell, CalendarDays, ChevronRight, CircleDollarSign, ClipboardList,
+  Bell, CalendarDays, ChevronRight, CircleDollarSign,
   LayoutDashboard, LogOut, Menu, PanelLeftClose, PanelLeftOpen, Plus, Search,
   Settings, ShieldCheck, Users, WalletCards
 } from "lucide-react";
@@ -11,6 +11,8 @@ import ConnectedPatientDetail from "@/components/connected-patient-detail";
 import ConnectedFinanceModule from "@/components/connected-finance-module";
 import ConnectedCashModule from "@/components/connected-cash-module";
 import ConnectedAgendaModule, { AgendaAppointment } from "@/components/connected-agenda-module";
+import ConnectedReportsModule from "@/components/connected-reports-module";
+import ConnectedSettingsModule from "@/components/connected-settings-module";
 
 type Patient = {
   id: string;
@@ -99,7 +101,7 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
     { key: "pacientes", label: "Pacientes", icon: <Users size={18}/> },
     { key: "financeiro", label: "Financeiro", icon: <CircleDollarSign size={18}/> },
     { key: "caixa", label: "Caixa", icon: <WalletCards size={18}/> },
-    { key: "relatorios", label: "Relatórios", icon: <ClipboardList size={18}/> },
+    { key: "relatorios", label: "Relatórios", icon: <ShieldCheck size={18}/> },
     { key: "configuracoes", label: "Configurações", icon: <Settings size={18}/> },
   ];
 
@@ -214,10 +216,8 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
         {module === "agenda" && <ConnectedAgendaModule appointments={appointments} selectedDate={agendaDate} view={agendaView} onViewChange={setAgendaView} onDateChange={setAgendaDate} onNewAppointment={()=>setShowAppointment(true)} onOpenPatient={openPatientById}/>} 
         {module === "financeiro" && <ConnectedFinanceModule clinicId={clinicId} role={role} patients={patients.map(({id,full_name})=>({id,full_name}))}/>} 
         {module === "caixa" && <ConnectedCashModule clinicId={clinicId} role={role}/>} 
-
-        {module === "relatorios" && <div className="page-enter"><div className="page-title-row"><div><span className="eyebrow">INTELIGÊNCIA DA CLÍNICA</span><h1>Relatórios</h1><p>Indicadores curtos, claros e úteis para decisão.</p></div></div><div className="insight-grid"><div className="insight-card tone-blue"><div className="insight-icon"><CalendarDays size={19}/></div><div><span>Agendamentos</span><strong>{appointments.length}</strong><small>Período carregado</small></div></div><div className="insight-card tone-sky"><div className="insight-icon"><Users size={19}/></div><div><span>Pacientes ativos</span><strong>{patients.filter((patient)=>patient.active).length}</strong><small>Base cadastrada</small></div></div></div><div className="hero-empty surface-card" style={{marginTop:18}}><div className="hero-empty-orb"><ClipboardList size={30}/></div><h2>Relatórios objetivos</h2><p>A próxima etapa adicionará produção, conversão de orçamento, recebimentos, inadimplência e ocupação da agenda.</p></div></div>}
-
-        {module === "configuracoes" && <div className="page-enter"><div className="page-title-row"><div><span className="eyebrow">PERSONALIZAÇÃO E CONTROLE</span><h1>Configurações</h1><p>Ajustes agrupados por contexto, sem labirinto de submenus.</p></div></div><div className="settings-grid">{[{t:"Clínica",d:"Dados da empresa, endereço e contatos.",i:"CE"},{t:"Usuários e profissionais",d:"Equipe, dentistas e perfis de acesso.",i:"UP"},{t:"Permissões",d:"Quem pode visualizar e alterar cada módulo.",i:"PE"},{t:"Agenda",d:"Horários, duração e disponibilidade.",i:"AG"},{t:"Pacientes",d:"Campos, documentos e preferências.",i:"PA"},{t:"Atendimento",d:"Prontuário, anamnese e odontograma.",i:"AT"},{t:"Financeiro",d:"Categorias e formas de pagamento.",i:"FI"},{t:"Segurança",d:"Sessões, auditoria e backups.",i:"SE"}].map((item)=><button className="settings-card" key={item.t}><div className="settings-card-icon">{item.i}</div><div><h3>{item.t}</h3><p>{item.d}</p></div><ChevronRight size={17}/></button>)}</div></div>}
+        {module === "relatorios" && <ConnectedReportsModule clinicId={clinicId} role={role} patientCount={patients.filter((patient)=>patient.active).length}/>} 
+        {module === "configuracoes" && <ConnectedSettingsModule clinicId={clinicId} role={role} clinicName={clinicName}/>} 
       </section>
     </main>
 
