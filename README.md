@@ -1,94 +1,71 @@
-# Clínica Estelita — Sistema Odontológico V1
+# Clínica Estelita — Sistema Odontológico
 
-Sistema web próprio para gestão de clínica odontológica, construído com Next.js + Supabase e preparado para deploy na Vercel.
+Sistema web próprio para gestão odontológica, construído com Next.js + Supabase e preparado para deploy automático na Vercel.
 
-> **Importante:** a tela inicial está em modo demonstração com dados fictícios. Não use dados reais de pacientes antes de concluir Supabase, autenticação, RLS, auditoria, backups e testes de permissão.
+> **Importante:** sem variáveis do Supabase o sistema abre em modo demonstração. Quando o Supabase é configurado, o acesso passa a exigir login e pacientes/agenda usam o banco real.
 
-## O que já existe nesta V1
+## O que já está funcionando
 
-- Dashboard da clínica
-- Agenda diária
-- Cadastro e busca de pacientes
-- Ficha do paciente em abas
-- Prontuário
-- Odontograma
-- Plano de tratamento
-- Orçamentos
-- Financeiro separado do caixa
-- Contas a receber / pagar (estrutura de banco)
-- Caixa e movimentações
-- Relatórios gerenciais
-- Usuários e perfis (estrutura de banco)
-- Login com e-mail e senha via Supabase Auth
-- Banco PostgreSQL completo
-- Row Level Security (RLS) por clínica
+- Interface responsiva
+- Dashboard demonstrativo
+- Login real com e-mail e senha via Supabase Auth
+- Proteção de rotas no Next.js 16
+- Identificação da clínica e perfil do usuário
+- Cadastro real de pacientes no PostgreSQL
+- Busca de pacientes
+- Agenda real persistida no PostgreSQL
+- Logout
+- Banco multi-clínica
+- Row Level Security (RLS)
+- Perfis: admin, recepção, dentista, financeiro e gestor
 - Storage privado preparado para documentos clínicos
-- Estrutura de auditoria
-- Layout responsivo para computador, tablet e celular
+- Auditoria automática das entidades críticas na migração 002
+- Bloqueio de exclusão física de prontuários na migração 002
+- CI do GitHub validando TypeScript e build de produção
+- Deploy automático Vercel conectado ao branch `main`
 
 ## Arquitetura
 
-- Frontend e backend web: **Next.js**
+- Frontend/backend web: **Next.js 16 + TypeScript**
 - Hospedagem: **Vercel**
 - Banco: **PostgreSQL no Supabase**
 - Login: **Supabase Auth**
-- Arquivos: **Supabase Storage**
-- Segurança de dados: **RLS + perfis de acesso**
+- Arquivos: **Supabase Storage privado**
+- Segurança: **RLS + perfis + auditoria**
 - Código: **GitHub**
 
 ---
 
-# 1. Ver a interface na Vercel agora
+# 1. Criar o projeto Supabase
 
-A interface demonstrativa funciona sem Supabase.
-
-1. Entre em https://vercel.com
-2. Clique em **Add New > Project**.
-3. Escolha o GitHub conectado.
-4. Selecione o repositório `tievolutec-cloud/clinica_estelita`.
-5. Framework Preset deve aparecer como **Next.js**.
-6. Não precisa adicionar variáveis ainda para ver a demonstração.
-7. Clique em **Deploy**.
-8. Ao terminar, clique em **Visit**.
-
-A tela inicial exibirá somente dados fictícios mantidos no navegador.
-
----
-
-# 2. Criar o projeto Supabase
-
-1. Entre em https://supabase.com/dashboard
+1. Entre no painel do Supabase.
 2. Clique em **New project**.
-3. Escolha sua organização.
-4. Nome sugerido: `clinica-estelita-prod`.
-5. Crie uma senha forte para o banco e guarde em gerenciador de senhas.
-6. Escolha a região mais adequada para a operação e requisitos de proteção de dados da clínica.
-7. Clique em **Create new project**.
+3. Nome sugerido: `clinica-estelita-prod`.
+4. Crie e guarde uma senha forte do banco.
+5. Escolha a região adequada para a clínica e seus requisitos de proteção de dados.
+6. Conclua a criação.
 
-## Criar as tabelas e regras
+## Executar as migrações
 
-1. No Supabase, abra **SQL Editor**.
-2. Clique em **New query**.
-3. No GitHub, abra `supabase/migrations/001_initial_schema.sql`.
-4. Copie todo o conteúdo.
-5. Cole no SQL Editor.
-6. Clique em **Run**.
-7. Confirme que não houve erro.
+No Supabase abra **SQL Editor > New query**.
 
-Esse arquivo cria as tabelas, tipos, índices, Storage e regras RLS iniciais.
+Execute os arquivos nesta ordem:
+
+1. `supabase/migrations/001_initial_schema.sql`
+2. `supabase/migrations/002_security_audit.sql`
+
+O primeiro cria tabelas, tipos, índices, RLS e Storage. O segundo endurece permissões clínicas, impede exclusão física de prontuário e ativa auditoria automática.
 
 ---
 
-# 3. Criar o primeiro usuário administrador
+# 2. Criar o primeiro administrador
 
-1. No Supabase, abra **Authentication > Users**.
-2. Clique em **Add user > Create new user**.
-3. Informe o e-mail do administrador.
-4. Use uma senha forte com pelo menos 12 caracteres.
-5. Marque o e-mail como confirmado apenas se você controlar esse endereço.
-6. Clique em **Create user**.
+1. Supabase > **Authentication > Users**.
+2. **Add user > Create new user**.
+3. Informe o e-mail do administrador e uma senha forte.
+4. Confirme o e-mail somente se você controlar o endereço.
 
-Depois abra **SQL Editor**, crie uma nova query e execute o modelo abaixo, trocando `SEU_EMAIL@EXEMPLO.COM` pelo e-mail realmente criado:
+Depois, no **SQL Editor**, troque o e-mail abaixo e execute:
 
 ```sql
 with new_clinic as (
@@ -102,78 +79,69 @@ from new_clinic nc
 join auth.users u on lower(u.email) = lower('SEU_EMAIL@EXEMPLO.COM');
 ```
 
-Depois confirme em **Table Editor > clinic_members** que existe uma linha com o perfil `admin`.
+Confirme em **Table Editor > clinic_members** que existe um vínculo com `role = admin`.
 
 ---
 
-# 4. Conectar Supabase à Vercel
+# 3. Conectar Supabase à Vercel
 
-No Supabase:
+No Supabase, copie:
 
-1. Abra **Project Settings**.
-2. Abra a área de API/Keys do projeto.
-3. Copie a **Project URL**.
-4. Copie somente a chave pública indicada para uso no cliente (`anon` / publishable, conforme exibida no painel atual).
-5. **Nunca coloque `service_role` no navegador, GitHub ou variável `NEXT_PUBLIC_*`.**
+- Project URL
+- Publishable key pública (ou `anon` pública nos projetos que ainda exibem o formato antigo)
 
-Na Vercel:
+Nunca use `service_role` em variável `NEXT_PUBLIC_*`.
 
-1. Abra o projeto `clinica_estelita`.
-2. Entre em **Settings > Environment Variables**.
-3. Crie:
+Na Vercel abra:
+
+**Projeto > Settings > Environment Variables**
+
+Crie:
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL
 ```
 
-Valor: Project URL do Supabase.
+E preferencialmente:
 
-4. Crie:
+```text
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+```
+
+Se o painel do seu projeto ainda usar chave `anon`, também há compatibilidade com:
 
 ```text
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 ```
 
-Valor: chave pública do projeto.
-
-5. Opcionalmente crie:
+Opcional:
 
 ```text
 NEXT_PUBLIC_APP_URL
 ```
 
-com a URL final da Vercel/domínio.
-
-6. Salve.
-7. Abra **Deployments**.
-8. Faça **Redeploy** do último deploy para carregar as novas variáveis.
-
-A rota `/login` já está preparada para autenticar pelo Supabase.
+Depois salve e faça um novo deploy. Assim que as duas variáveis obrigatórias existirem, `/` passa a exigir login.
 
 ---
 
-# 5. Antes de colocar pacientes reais
+# 4. Fluxo atual conectado
 
-Não considere esta V1 pronta para produção clínica só porque está online. Antes de inserir informações reais de saúde, faça obrigatoriamente:
+Depois de configurar Supabase e entrar:
 
-- Validar cada perfil: Administrador, Recepção, Dentista, Financeiro e Gestor.
-- Testar que uma clínica não acessa dados de outra clínica.
-- Criar auditoria automática para alterações críticas de prontuário e financeiro.
-- Definir política para correção/adendo de prontuários sem apagar histórico clínico.
-- Configurar backup do PostgreSQL.
-- Configurar backup separado dos objetos do Supabase Storage.
-- Testar restauração de backup.
-- Definir política de privacidade, bases legais, retenção e direitos dos titulares conforme LGPD.
-- Revisar transferência/localização de dados com responsável jurídico/LGPD quando aplicável.
-- Ativar MFA para administradores assim que o fluxo escolhido estiver definido.
-- Configurar domínio, HTTPS e e-mail transacional.
-- Realizar testes com dados fictícios primeiro.
+1. O servidor valida o usuário.
+2. Busca o vínculo do usuário em `clinic_members`.
+3. Descobre qual clínica e qual perfil podem ser usados.
+4. O banco aplica RLS.
+5. A tela carrega pacientes reais.
+6. Novo paciente grava no PostgreSQL.
+7. A agenda lê e grava agendamentos reais.
+8. Auditoria registra alterações nas entidades protegidas após executar a migração 002.
+
+Sem vínculo em `clinic_members`, o sistema bloqueia o uso operacional e informa que o usuário ainda não pertence a uma clínica.
 
 ---
 
-# 6. Estrutura principal do banco
-
-O arquivo `supabase/migrations/001_initial_schema.sql` cria:
+# 5. Estrutura principal do banco
 
 - `clinics`
 - `profiles`
@@ -195,46 +163,64 @@ O arquivo `supabase/migrations/001_initial_schema.sql` cria:
 - `cash_movements`
 - `audit_logs`
 
-Os registros operacionais possuem `clinic_id` para permitir isolamento entre clínicas/unidades.
-
 ---
 
-# 7. Perfis previstos
+# 6. Perfis
 
-- `admin`: controle administrativo completo
-- `recepcao`: agenda, pacientes e operações autorizadas de recepção
-- `dentista`: informações clínicas e atendimento
+- `admin`: administração completa
+- `recepcao`: pacientes, agenda e operações autorizadas
+- `dentista`: prontuário, anamnese, odontograma e tratamentos
 - `financeiro`: financeiro e caixa
-- `gestor`: consultas gerenciais e relatórios
+- `gestor`: consultas e relatórios
 
-As regras precisam ser revisadas com o funcionamento real da Clínica Estelita antes da produção.
-
----
-
-# 8. Próxima etapa de desenvolvimento
-
-A interface desta versão já permite avaliar o fluxo visual. A próxima etapa técnica é substituir gradualmente os dados demonstrativos pelos dados reais do Supabase, começando nesta ordem:
-
-1. Sessão/login obrigatório
-2. Clínica e usuário logado
-3. Pacientes
-4. Agenda
-5. Prontuário/anamnese
-6. Odontograma
-7. Tratamentos e orçamentos
-8. Contas a receber
-9. Pagamentos e caixa
-10. Contas a pagar
-11. Relatórios
-12. Arquivos clínicos
-13. Auditoria completa
-
-Essa ordem mantém o sistema utilizável em cada etapa e facilita testes de segurança.
+A migração 002 corrige uma permissão importante da versão inicial: **recepção não pode escrever prontuário, anamnese, odontograma ou plano clínico**.
 
 ---
 
-## Segurança
+# 7. Segurança antes de pacientes reais
 
-Este projeto não armazena senhas em texto puro. A autenticação foi projetada para usar Supabase Auth. Chaves reais devem existir somente nas configurações seguras do ambiente e nunca ser commitadas no GitHub.
+Antes de inserir dados reais de saúde:
 
-Dados odontológicos podem conter dados pessoais sensíveis de saúde. A entrada em produção deve ocorrer somente depois dos testes técnicos, operacionais e de conformidade correspondentes.
+- execute as duas migrações;
+- teste cada perfil com contas separadas;
+- confirme que clínica A não acessa clínica B;
+- teste auditoria;
+- teste que prontuários não podem ser apagados;
+- configure backup do PostgreSQL;
+- configure backup separado do Storage;
+- teste restauração;
+- configure MFA para perfis administrativos quando o fluxo estiver definido;
+- configure e-mail transacional;
+- revise política de privacidade, retenção e procedimentos LGPD;
+- mantenha chaves secretas fora do GitHub.
+
+Dados odontológicos podem conter dados pessoais sensíveis de saúde. Estar publicado na Vercel não significa, sozinho, estar pronto para produção clínica.
+
+---
+
+# 8. Próximas entregas de desenvolvimento
+
+Ordem planejada:
+
+1. Prontuário/anamnese reais
+2. Odontograma persistente
+3. Plano de tratamento e orçamento
+4. Contas a receber e parcelamento
+5. Pagamentos e caixa
+6. Contas a pagar
+7. Relatórios reais
+8. Upload de arquivos clínicos
+9. Administração de usuários/permissões pela interface
+10. Recuperação de senha, MFA e reforços finais
+
+---
+
+## Validação automática
+
+O arquivo `.github/workflows/ci.yml` executa a cada alteração:
+
+- instalação das dependências;
+- verificação TypeScript;
+- build de produção Next.js.
+
+A Vercel continua fazendo o deploy automaticamente a partir do branch `main`.
