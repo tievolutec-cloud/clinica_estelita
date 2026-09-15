@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, FileText, Plus, Stethoscope, WalletCards } from "lucide-react";
+import { ArrowLeft, FileText, Plus, WalletCards } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type Patient = {
@@ -42,6 +42,12 @@ function dateOnly(value: string | null) {
 }
 function money(value: number) {
   return Number(value || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+function answerText(anamnesis: Anamnesis | undefined, key: string) {
+  const value = anamnesis?.answers?.[key];
+  if (typeof value === "string" && value.trim()) return value.trim();
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return "Não informado";
 }
 function normalizePlan(raw: unknown): Plan {
   const value = raw as Omit<Plan, "treatment_plan_items"> & { treatment_plan_items?: PlanItem[] | null };
@@ -250,7 +256,7 @@ export default function ConnectedPatientDetail({ clinicId, role, patient, onBack
 
         {!loading && tab === "Anamnese" && <div className="grid two">
           <form className="card pad form-grid" onSubmit={addAnamnesis}><div className="field full"><label>Alergias</label><textarea name="allergies" rows={3}/></div><div className="field full"><label>Medicamentos em uso</label><textarea name="medications" rows={3}/></div><div className="field full"><label>Condições de saúde / histórico</label><textarea name="conditions" rows={4}/></div><div className="field full"><label>Alertas importantes</label><textarea name="alerts" rows={2}/></div><div className="field full"><button className="btn primary" disabled={!canClinicalWrite}>{canClinicalWrite ? "Registrar nova anamnese" : "Sem permissão clínica"}</button></div></form>
-          <div className="card pad"><h3 style={{marginTop:0}}>Última anamnese</h3>{latestAnamnesis ? <><p><strong>Data:</strong> {dateTime(latestAnamnesis.created_at)}</p><p><strong>Alertas:</strong> {latestAnamnesis.alerts || "Nenhum"}</p><pre style={{whiteSpace:"pre-wrap",fontFamily:"inherit",color:"var(--muted)"}}>{JSON.stringify(latestAnamnesis.answers, null, 2)}</pre></> : <div className="empty">Nenhuma anamnese registrada.</div>}</div>
+          <div className="card pad"><h3 style={{marginTop:0}}>Última anamnese</h3>{latestAnamnesis ? <><p className="timeline-meta" style={{marginBottom:16}}>Registrada em {dateTime(latestAnamnesis.created_at)}</p><div className="kpi-row"><span>Alergias</span><strong style={{maxWidth:"62%",textAlign:"right"}}>{answerText(latestAnamnesis, "allergies")}</strong></div><div className="kpi-row"><span>Medicamentos em uso</span><strong style={{maxWidth:"62%",textAlign:"right"}}>{answerText(latestAnamnesis, "medications")}</strong></div><div className="kpi-row"><span>Condições / histórico</span><strong style={{maxWidth:"62%",textAlign:"right"}}>{answerText(latestAnamnesis, "conditions")}</strong></div><div className="kpi-row"><span>Alertas importantes</span><strong style={{maxWidth:"62%",textAlign:"right",color:latestAnamnesis.alerts ? "var(--danger)" : "inherit"}}>{latestAnamnesis.alerts || "Nenhum"}</strong></div>{anamneses.length > 1 && <div style={{marginTop:20}}><h4 style={{margin:"0 0 8px"}}>Histórico de anamneses</h4>{anamneses.slice(1).map((item)=><div className="kpi-row" key={item.id}><span>{dateTime(item.created_at)}</span><span className="badge">Registro anterior</span></div>)}</div>}</> : <div className="empty">Nenhuma anamnese registrada.</div>}</div>
         </div>}
 
         {!loading && tab === "Prontuário" && <div className="grid two">
