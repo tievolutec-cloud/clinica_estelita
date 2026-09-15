@@ -13,12 +13,14 @@ type Patient = {
   created_at: string;
 };
 
+type AppointmentPatient = { full_name: string };
+
 type Appointment = {
   id: string;
   starts_at: string;
   procedure_name: string | null;
   status: string;
-  patients: { full_name: string } | null;
+  patients: AppointmentPatient | AppointmentPatient[] | null;
 };
 
 type Props = {
@@ -43,6 +45,11 @@ function fmtTime(value: string) {
 
 function labelStatus(status: string) {
   return status.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
+}
+
+function appointmentPatientName(value: Appointment["patients"]) {
+  if (Array.isArray(value)) return value[0]?.full_name || "Paciente";
+  return value?.full_name || "Paciente";
 }
 
 export default function ConnectedClinicApp({ clinicId, clinicName, role, userName, initialPatients, initialAppointments }: Props) {
@@ -152,7 +159,7 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
               <div className="card metric"><div className="label">Perfil atual</div><div className="value" style={{fontSize:20}}>{role}</div><div className="hint">Permissões aplicadas pelo banco</div></div>
               <div className="card metric"><div className="label">Ambiente</div><div className="value" style={{fontSize:20}}>Produção</div><div className="hint">Vercel + Supabase</div></div>
             </div>
-            <div className="card" style={{marginTop:16}}><div className="card-head"><h3>Próximos atendimentos</h3></div><div className="timeline">{appointments.slice(0,8).map(a => <div className="timeline-item" key={a.id}><div className="timeline-time">{fmtTime(a.starts_at)}</div><div><div className="timeline-title">{a.patients?.full_name || "Paciente"}</div><div className="timeline-meta">{a.procedure_name || "Atendimento"} · {labelStatus(a.status)}</div></div></div>)}{appointments.length === 0 && <div className="empty">Nenhum agendamento encontrado.</div>}</div></div>
+            <div className="card" style={{marginTop:16}}><div className="card-head"><h3>Próximos atendimentos</h3></div><div className="timeline">{appointments.slice(0,8).map(a => <div className="timeline-item" key={a.id}><div className="timeline-time">{fmtTime(a.starts_at)}</div><div><div className="timeline-title">{appointmentPatientName(a.patients)}</div><div className="timeline-meta">{a.procedure_name || "Atendimento"} · {labelStatus(a.status)}</div></div></div>)}{appointments.length === 0 && <div className="empty">Nenhum agendamento encontrado.</div>}</div></div>
           </>}
 
           {module === "pacientes" && <>
@@ -163,7 +170,7 @@ export default function ConnectedClinicApp({ clinicId, clinicName, role, userNam
 
           {module === "agenda" && <>
             <div className="page-head"><div><h1>Agenda</h1><p>Agendamentos persistidos no Supabase.</p></div><button className="btn primary" onClick={() => setShowAppointment(true)}><Plus size={16}/> Novo agendamento</button></div>
-            <div className="card"><div className="timeline">{appointments.map(a => <div className="timeline-item" key={a.id}><div className="timeline-time">{fmtTime(a.starts_at)}</div><div><div className="timeline-title">{a.patients?.full_name || "Paciente"}</div><div className="timeline-meta">{a.procedure_name || "Atendimento"} · {labelStatus(a.status)}</div></div></div>)}{appointments.length === 0 && <div className="empty">Nenhum agendamento encontrado.</div>}</div></div>
+            <div className="card"><div className="timeline">{appointments.map(a => <div className="timeline-item" key={a.id}><div className="timeline-time">{fmtTime(a.starts_at)}</div><div><div className="timeline-title">{appointmentPatientName(a.patients)}</div><div className="timeline-meta">{a.procedure_name || "Atendimento"} · {labelStatus(a.status)}</div></div></div>)}{appointments.length === 0 && <div className="empty">Nenhum agendamento encontrado.</div>}</div></div>
           </>}
         </section>
       </main>
