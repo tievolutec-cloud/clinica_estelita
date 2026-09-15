@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { LockKeyhole, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginForm() {
@@ -27,21 +27,26 @@ export default function LoginForm() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 20, background: "#f2f6f5" }}>
-      <section className="card" style={{ width: "min(430px, 100%)", padding: 28, boxShadow: "var(--shadow)" }}>
-        <div className="brand" style={{ color: "var(--text)", padding: 0, marginBottom: 24 }}>
-          <div className="brand-mark" style={{ background: "var(--brand)", color: "white" }}>CE</div>
-          <div><strong>Clínica Estelita</strong><small style={{ color: "var(--muted)" }}>Acesso seguro</small></div>
+    <main className="login-shell">
+      <div className="login-glow login-glow-one"/>
+      <div className="login-glow login-glow-two"/>
+      <section className="login-card surface-card">
+        <div className="login-brand-row">
+          <div className="brand-mark">CE</div>
+          <div><strong>Clínica Estelita</strong><small>Gestão odontológica</small></div>
         </div>
-        <h1 style={{ fontSize: 24, marginBottom: 6 }}>Entrar</h1>
-        <p style={{ color: "var(--muted)", marginTop: 0, marginBottom: 22 }}>Use o e-mail e a senha cadastrados no Supabase.</p>
-        <form onSubmit={submit} className="form-grid" style={{ gridTemplateColumns: "1fr" }}>
-          <div className="field"><label><Mail size={14} style={{ verticalAlign: "middle" }}/> E-mail</label><input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="voce@clinica.com.br"/></div>
-          <div className="field"><label><LockKeyhole size={14} style={{ verticalAlign: "middle" }}/> Senha</label><input type="password" required value={password} onChange={e => setPassword(e.target.value)} minLength={8}/></div>
-          {message && <div className="notice" style={{ borderColor: "#e9c7c7", background: "#fff1f1", color: "#8a3d3d", margin: 0 }}>{message}</div>}
-          <button className="btn primary" disabled={loading} type="submit">{loading ? "Entrando..." : "Entrar no sistema"}</button>
+        <div className="login-intro">
+          <span className="eyebrow"><Sparkles size={12}/> ACESSO SEGURO</span>
+          <h1>Bem-vindo de volta</h1>
+          <p>Entre para acessar agenda, pacientes, prontuário e gestão da clínica.</p>
+        </div>
+        <form onSubmit={submit} className="login-form">
+          <div className="field"><label><Mail size={14}/> E-mail</label><input type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="voce@clinica.com.br"/></div>
+          <div className="field"><label><LockKeyhole size={14}/> Senha</label><input type="password" required value={password} onChange={e=>setPassword(e.target.value)} minLength={8} placeholder="••••••••"/></div>
+          {message && <div className="notice login-error">{message}</div>}
+          <button className="btn primary login-submit" disabled={loading} type="submit">{loading ? "Entrando..." : "Entrar no sistema"}</button>
         </form>
-        <p style={{ display: "flex", gap: 7, alignItems: "center", color: "var(--muted)", fontSize: 12, marginTop: 20, marginBottom: 0 }}><ShieldCheck size={15}/> Senhas são tratadas pelo Supabase Auth e nunca devem ser armazenadas em texto puro.</p>
+        <div className="login-security"><ShieldCheck size={16}/><span>Autenticação protegida pelo Supabase. Senhas não ficam armazenadas em texto puro.</span></div>
       </section>
     </main>
   );
